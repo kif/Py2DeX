@@ -83,7 +83,7 @@ dilstruct[4, 4] = 0
 # and is used to dilate saturated stars and connect cosmic rays.
 
 
-class cosmicsimage:
+class cosmicsimage(object):
     def __init__(self, rawarray, pssl=0.0, gain=2.2, readnoise=10.0, sigclip=5.0, sigfrac=0.3, objlim=5.0,
                  satlevel=50000.0, verbose=True):
         """
