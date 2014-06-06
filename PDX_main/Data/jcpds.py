@@ -20,7 +20,7 @@ Modifications:
 """
 import string
 import numpy as np
-from scipy.optimize import minimize
+import scipy.optimize
 import os
 
 
@@ -439,7 +439,10 @@ class jcpds:
             else:
                 self.mod_pressure = pressure - \
                                     self.alpha_t * self.k0 * (temperature - 298.)
-                res = minimize(self.bm3_inverse, 1.)
+                if "minimize" in dir(scipy.opimize):
+                    res = scipy.opimize.minimize(self.bm3_inverse, 1.)
+                else:
+                    res = scipy.opimize.fmin_b(self.bm3_inverse, 1.)
                 self.v = self.v0 / np.float(res.x)
 
     def bm3_inverse(self, v0_v):
