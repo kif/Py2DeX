@@ -5,7 +5,7 @@ from PyQt4 import QtGui, QtCore
 import pyqtgraph as pg
 
 from PyQtGraphTestView import PyQtGraphView
-## Switch to using white background and black foreground
+# # Switch to using white background and black foreground
 pg.setConfigOption('useOpenGL', False)
 pg.setConfigOption('leftButtonPan', False)
 pg.setConfigOption('background', 'k')
