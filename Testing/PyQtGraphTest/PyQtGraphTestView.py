@@ -93,7 +93,7 @@ class PyQtGraphView(QtGui.QWidget, Ui_Form):
         self.img_item_left.setImage(img_data, autoRange=autoRange, autoHistogramRange=autoHistogramRange,
                                     autoLevels=autoLevels)
         self.img_item_left.setLookupTable(self.create_color_map())
-        #self.img_item_left.setLevels([0,1])
+        # self.img_item_left.setLevels([0,1])
 
     def create_color_map(self):
         steps = np.array([0, 1])
