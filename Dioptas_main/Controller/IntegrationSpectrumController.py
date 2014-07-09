@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# Py2DeX - GUI program for fast processing of 2D X-ray data
+# Dioptas - GUI program for fast processing of 2D X-ray data
 # Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
 # GSECARS, University of Chicago
 #
@@ -58,6 +58,8 @@ class IntegrationSpectrumController(object):
         self.connect_click_function(self.view.spec_load_btn, self.load)
         self.connect_click_function(self.view.spec_previous_btn, self.load_previous)
         self.connect_click_function(self.view.spec_next_btn, self.load_next)
+        self.view.spec_filename_txt.editingFinished.connect(self.filename_txt_changed)
+
         self.connect_click_function(self.view.spec_directory_btn, self.spec_directory_btn_click)
         self.connect_click_function(self.view.spec_browse_by_name_rb, self.set_iteration_mode_number)
         self.connect_click_function(self.view.spec_browse_by_time_rb, self.set_iteration_mode_time)
@@ -90,12 +92,12 @@ class IntegrationSpectrumController(object):
 
                 self.view.spec_next_btn.setEnabled(True)
                 self.view.spec_previous_btn.setEnabled(True)
-                self.view.spec_filename_lbl.setText(os.path.basename(filename))
+                self.view.spec_filename_txt.setText(os.path.basename(filename))
                 self.view.spec_directory_txt.setText(os.path.dirname(filename))
             else:
                 self.view.spec_next_btn.setEnabled(False)
                 self.view.spec_previous_btn.setEnabled(False)
-                self.view.spec_filename_lbl.setText(
+                self.view.spec_filename_txt.setText(
                     'No File saved or selected')
                 filename = None
 
@@ -186,23 +188,37 @@ class IntegrationSpectrumController(object):
                 directory=self.working_dir['spectrum']))
         if filename is not '':
             self.working_dir['spectrum'] = os.path.dirname(filename)
-            self.view.spec_filename_lbl.setText(os.path.basename(filename))
+            self.view.spec_filename_txt.setText(os.path.basename(filename))
+            self.view.spec_directory_txt.setText(os.path.dirname(filename))
             self.spectrum_data.load_spectrum(filename)
             self.view.spec_next_btn.setEnabled(True)
             self.view.spec_previous_btn.setEnabled(True)
 
     def load_previous(self):
         self.spectrum_data.load_previous()
-        self.view.spec_filename_lbl.setText(
+        self.view.spec_filename_txt.setText(
             os.path.basename(self.spectrum_data.spectrum_filename))
 
     def load_next(self):
         self.spectrum_data.load_next()
-        self.view.spec_filename_lbl.setText(
+        self.view.spec_filename_txt.setText(
             os.path.basename(self.spectrum_data.spectrum_filename))
 
     def autocreate_cb_changed(self):
         self.autocreate = self.view.spec_autocreate_cb.isChecked()
+
+
+    def filename_txt_changed(self):
+        current_filename = os.path.basename(self.spectrum_data.spectrum_filename)
+        current_directory = str(self.view.spec_directory_txt.text())
+        new_filename = str(self.view.spec_filename_txt.text())
+        if os.path.isfile(os.path.join(current_directory, new_filename)):
+            try:
+                self.load(os.path.join(current_directory, new_filename))
+            except TypeError:
+                self.view.spec_filename_txt.setText(current_filename)
+        else:
+            self.view.spec_filename_txt.setText(current_filename)
 
     def spec_directory_btn_click(self):
         directory = QtGui.QFileDialog.getExistingDirectory(

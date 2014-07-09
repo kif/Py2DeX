@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
-#     Dioptas - GUI program for fast processing of 2D X-ray data
-#     Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
+# Dioptas - GUI program for fast processing of 2D X-ray data
+# Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
 #     GSECARS, University of Chicago
 #
 #     This program is free software: you can redistribute it and/or modify
@@ -15,8 +15,18 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-__author__ = 'Doomgoroth'
+__author__ = 'Clemens Prescher'
+import sys
+import os
 
-# TODO pressed buttons have to be shown differently (somehow the keyword does not work right now in the QT stylesheets)
-#TODO the scrollbar needs to be with correct background (just setting it will disable the current look)
-#TODO spinboxes should have rounded corners. This resets the original look --> need our own images etc.
+
+def we_are_frozen():
+    # All of the modules are built-in to the interpreter, e.g., by py2exe
+    return hasattr(sys, "frozen")
+
+
+def module_path():
+    encoding = sys.getfilesystemencoding()
+    if we_are_frozen():
+        return os.path.dirname(unicode(sys.executable, encoding))
+    return os.path.dirname(unicode(__file__, encoding))

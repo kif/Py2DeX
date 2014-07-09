@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
-# Py2DeX - GUI program for fast processing of 2D X-ray data
+# Dioptas - GUI program for fast processing of 2D X-ray data
 # Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
 # GSECARS, University of Chicago
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 #     (at your option) any later version.
 #
 #     This program is distributed in the hope that it will be useful,
@@ -18,11 +18,10 @@
 
 __author__ = 'Clemens Prescher'
 
-import sys
 import os
 from PyQt4 import QtGui, QtCore
 from UiFiles.CalibrationUI import Ui_XrsCalibrationWidget
-from ImgView import ImgView, CalibrationCakeView
+from ImgView import MaskImgView, CalibrationCakeView
 from SpectrumView import SpectrumView
 from Data.HelperModule import SignalFrequencyLimiter
 import numpy as np
@@ -35,7 +34,7 @@ class CalibrationView(QtGui.QWidget, Ui_XrsCalibrationWidget):
         self.setupUi(self)
         self.splitter.setStretchFactor(0, 2)
 
-        self.img_view = ImgView(self.img_pg_layout)
+        self.img_view = MaskImgView(self.img_pg_layout)
         self.cake_view = CalibrationCakeView(self.cake_pg_layout)
         self.spectrum_view = SpectrumView(self.spectrum_pg_layout)
 
@@ -79,7 +78,7 @@ class CalibrationView(QtGui.QWidget, Ui_XrsCalibrationWidget):
         self.options_peaksearch_algorithm_cb.setStyle(cleanlooks)
 
     def set_img_filename(self, filename):
-        self.filename_lbl.setText(os.path.basename(filename))
+        self.filename_txt.setText(os.path.basename(filename))
 
     def set_start_values(self, start_values):
         self.sv_distance_txt.setText('%.3f' % (start_values['dist'] * 1000))

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# Py2DeX - GUI program for fast processing of 2D X-ray data
+# Dioptas - GUI program for fast processing of 2D X-ray data
 # Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
 # GSECARS, University of Chicago
 #
@@ -23,7 +23,7 @@ from Views.ExLegendItem import LegendItem
 import numpy as np
 from Data.HelperModule import calculate_color
 from PyQt4 import QtCore, QtGui
-from  pyqtgraph.exporters.ImageExporter import ImageExporter
+from pyqtgraph.exporters.ImageExporter import ImageExporter
 from pyqtgraph.exporters.SVGExporter import SVGExporter
 
 # TODO refactoring of the 3 lists: overlays, overlay_names, overlay_show, should probably a class, making it more readable
@@ -82,6 +82,7 @@ class SpectrumView(QtCore.QObject):
             self.legend.legendItems[0][1].setText(name)
             self.plot_name = name
         self.update_x_limits()
+        self.legend.updateSize()
 
     def update_x_limits(self):
         x_range = list(self.plot_item.dataBounds(0))
@@ -110,6 +111,7 @@ class SpectrumView(QtCore.QObject):
             self.spectrum_plot.addItem(self.overlays[-1])
             self.legend.addItem(self.overlays[-1], spectrum.name)
             self.update_x_limits()
+        return color
 
     def del_overlay(self, ind):
         self.spectrum_plot.removeItem(self.overlays[ind])
@@ -121,13 +123,13 @@ class SpectrumView(QtCore.QObject):
 
     def hide_overlay(self, ind):
         self.spectrum_plot.removeItem(self.overlays[ind])
-        self.legend.removeItem(self.overlays[ind])
+        self.legend.hideItem(ind+1)
         self.overlay_show[ind] = False
         self.update_x_limits()
 
     def show_overlay(self, ind):
         self.spectrum_plot.addItem(self.overlays[ind])
-        self.legend.addItem(self.overlays[ind], self.overlay_names[ind])
+        self.legend.showItem(ind+1)
         self.overlay_show[ind] = True
         self.update_x_limits()
 
@@ -138,11 +140,37 @@ class SpectrumView(QtCore.QObject):
             self.view_box.autoRange()
             self.view_box.enableAutoRange()
 
+    def get_overlay_color(self, ind):
+        pass
+
+    def set_overlay_color(self, ind, color):
+        self.overlays[ind].setPen(pg.mkPen(color=color, width=1.5))
+        self.legend.setItemColor(ind+1, color)
+
+    def rename_overlay(self, ind, name):
+        self.legend.renameItem(ind+1, name)
+
     def add_phase(self, name, positions, intensities, baseline):
         self.phases.append(PhasePlot(self.spectrum_plot, self.phases_legend, positions, intensities, name, baseline))
+        return self.phases[-1].color
 
-    def update_phase(self, ind, positions, intensities, name=None, baseline=0):
-        self.phases[ind].create_items(positions, intensities, name, baseline)
+    # def update_phase(self, ind, positions, intensities, name=None, baseline=0):
+    #     self.phases[ind].create_items(positions, intensities, name, baseline)
+
+    def set_phase_color(self, ind, color):
+        self.phases[ind].set_color(color)
+        self.phases_legend.setItemColor(ind, color)
+
+    def hide_phase(self, ind):
+        self.phases[ind].hide()
+        self.phases_legend.hideItem(ind)
+
+    def show_phase(self, ind):
+        self.phases[ind].show()
+        self.phases_legend.showItem(ind)
+
+    def rename_phase(self, ind, name):
+        self.phases_legend.renameItem(ind, name)
 
     def update_phase_intensities(self, ind, positions, intensities, baseline=0):
         if len(self.phases):
@@ -218,7 +246,7 @@ class SpectrumView(QtCore.QObject):
             else:
                 self._auto_range = False
                 self.view_box.scaleBy(2)
-                self.view_box.sigRangeChangedManually.emit(self.view_box.state['mouseEnabled'])
+            self.view_box.sigRangeChangedManually.emit(self.view_box.state['mouseEnabled'])
         elif ev.button() == QtCore.Qt.LeftButton:
             pos = self.view_box.mapFromScene(ev.pos())
             pos = self.plot_item.mapFromScene(2 * ev.pos() - pos)
@@ -228,7 +256,8 @@ class SpectrumView(QtCore.QObject):
 
 
     def myMouseDoubleClickEvent(self, ev):
-        if ev.button() == QtCore.Qt.RightButton:
+        if (ev.button() == QtCore.Qt.RightButton) or (ev.button() == QtCore.Qt.LeftButton and \
+                                                                  ev.modifiers() & QtCore.Qt.ControlModifier):
             self.view_box.autoRange()
             self.view_box.enableAutoRange()
             self._auto_range = True
@@ -318,7 +347,8 @@ class PhasePlot(object):
         self.line_items = []
         self.line_visible = []
         self.index = PhasePlot.num_phases
-        self.pen = pg.mkPen(color=calculate_color(self.index + 9), width=1.3, style=QtCore.Qt.DashLine)
+        self.color = calculate_color(self.index + 9)
+        self.pen = pg.mkPen(color=self.color, width=1.3, style=QtCore.Qt.DashLine)
         self.ref_legend_line = pg.PlotDataItem(pen=self.pen)
         self.name = ''
         PhasePlot.num_phases += 1
@@ -359,6 +389,19 @@ class PhasePlot(object):
                 if self.line_visible[ind]:
                     self.plot_item.removeItem(line_item)
                     self.line_visible[ind] = False
+
+    def set_color(self, color):
+        for line_item in self.line_items:
+            line_item.setPen(pg.mkPen(color=color, width=1.3, style=QtCore.Qt.DashLine))
+
+    def hide(self):
+        for line_item in self.line_items:
+            line_item.hide()
+
+    def show(self):
+        for line_item in self.line_items:
+            line_item.show()
+
 
     def remove(self):
         try:

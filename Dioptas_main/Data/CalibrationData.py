@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
-# Py2DeX - GUI program for fast processing of 2D X-ray data
+# Dioptas - GUI program for fast processing of 2D X-ray data
 # Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
-#     GSECARS, University of Chicago
+# GSECARS, University of Chicago
 #
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -25,11 +25,9 @@ from pyFAI.geometryRefinement import GeometryRefinement
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.calibrant import Calibrant
 from Data.HelperModule import get_base_name
+import Calibrants
+import os
 import numpy as np
-import pyqtgraph as pg
-
-import matplotlib.pyplot as plt
-
 
 class CalibrationData(object):
     def __init__(self, img_data=None):
@@ -48,7 +46,7 @@ class CalibrationData(object):
         self.use_mask = False
         self.calibration_name = 'None'
         self.polarization_factor = 0.95
-        self._calibrants_working_dir = 'ExampleData/Calibrants'
+        self._calibrants_working_dir = os.path.dirname(Calibrants.__file__)
 
     def find_peaks_automatic(self, x, y, peak_ind):
         massif = Massif(self.img_data.img_data)
@@ -89,7 +87,7 @@ class CalibrationData(object):
             return
 
     def search_peaks_on_ring(self, peak_index, delta_tth=0.1, min_mean_factor=1,
-                             upper_limit=55000):
+                             upper_limit=55000, mask=None):
         if not self.is_calibrated:
             return
 
@@ -107,8 +105,12 @@ class CalibrationData(object):
             tth_array = self.geometry._ttha
 
         # create mask based on two_theta position
-        mask = abs(tth_array - tth_calibrant) <= delta_tth
+        ring_mask = abs(tth_array - tth_calibrant) <= delta_tth
 
+        if mask is not None:
+            mask = np.logical_and(ring_mask, np.logical_not(mask))
+        else:
+            mask = ring_mask
 
         # calculate the mean and standard deviation of this area
         sub_data = np.array(self.img_data.img_data.ravel()[np.where(mask.ravel())], dtype=np.float64)
@@ -165,7 +167,7 @@ class CalibrationData(object):
         self.integrate_2d()
 
     def integrate_1d(self, num_points=1400, mask=None, polarization_factor=None, filename=None, unit='2th_deg'):
-        if np.sum(mask) == self.img_data.img_data.shape[0]*self.img_data.img_data.shape[1]:
+        if np.sum(mask) == self.img_data.img_data.shape[0] * self.img_data.img_data.shape[1]:
             #do not perform integration if the image is completelye masked...
             return self.tth, self.int
         if polarization_factor is None:
@@ -180,8 +182,8 @@ class CalibrationData(object):
             self.int = self.int[ind]
         else:
             self.tth, self.int = self.geometry.integrate1d(self.img_data.img_data, num_points, method='lut', unit=unit,
-                                                 mask=mask, polarization_factor=polarization_factor,
-                                                 filename=filename)
+                                                           mask=mask, polarization_factor=polarization_factor,
+                                                           filename=filename)
         if self.int.max() > 0:
             ind = np.where(self.int > 0)
             self.tth = self.tth[ind]
@@ -232,8 +234,7 @@ class CalibrationData(object):
                                            dist=self.start_values['dist'],
                                            wavelength=self.start_values['wavelength'],
                                            pixel1=self.start_values['pixel_width'],
-                                           pixel2=self.start_values['pixel_height'],
-                                           calibrant=self.calibrant)
+                                           pixel2=self.start_values['pixel_height'])
         self.geometry.load(filename)
         self.calibration_name = get_base_name(filename)
         self.is_calibrated = True

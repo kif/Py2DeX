@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# Py2DeX - GUI program for fast processing of 2D X-ray data
+# Dioptas - GUI program for fast processing of 2D X-ray data
 #     Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
 #     GSECARS, University of Chicago
 #
@@ -58,8 +58,8 @@ class ImgView(QtCore.QObject):
             #create the item handling the Data img
             self.data_img_item = pg.ImageItem()
             self.img_view_box.addItem(self.data_img_item)
-            self.img_histogram_LUT = pg.HistogramLUTItem(self.data_img_item)
-            self.img_histogram_LUT.axis.hide()
+            self.img_histogram_LUT = HorHistogramLUTItem(self.data_img_item, orientation='vertical')
+            # self.img_histogram_LUT.axis.hide()
             self.pg_layout.addItem(self.img_histogram_LUT, 0, 1)
 
         self.img_view_box.setAspectLocked()
@@ -252,7 +252,7 @@ class MaskImgView(ImgView):
         return polygon
 
 
-from Tools import marchingsquares
+from pyFAI import marchingsquares
 
 
 class IntegrationImgView(MaskImgView, CalibrationCakeView):

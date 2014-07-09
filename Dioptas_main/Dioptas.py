@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# Py2DeX - GUI program for fast processing of 2D X-ray data
+# Dioptas - GUI program for fast processing of 2D X-ray data
 # Copyright (C) 2014  Clemens Prescher (clemens.prescher@gmail.com)
 # GSECARS, University of Chicago
 #
@@ -27,9 +27,7 @@ from PyQt4 import QtGui
 from Controller.MainController import MainController
 
 if __name__ == "__main__":
-
     app = QtGui.QApplication(sys.argv)
-
     from sys import platform as _platform
 
     if _platform == "linux" or _platform == "linux2":
@@ -38,5 +36,5 @@ if __name__ == "__main__":
         app.setStyle('plastique')
         # possible values:
         # "windows", "motif", "cde", "plastique", "windowsxp", or "macintosh"
-    controller = MainController()
+    controller = MainController(app)
     app.exec_()
