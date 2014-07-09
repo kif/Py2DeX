@@ -20,7 +20,10 @@ Modifications:
 """
 import string
 import numpy as np
-from scipy.optimize import minimize
+try:
+    from scipy.optimize import minimize
+except ImportError:
+    from scipy.optimize import fmin_bfgs as minimize
 import os
 
 
@@ -440,7 +443,11 @@ class jcpds:
                 self.mod_pressure = pressure - \
                                     self.alpha_t * self.k0 * (temperature - 298.)
                 res = minimize(self.bm3_inverse, 1.)
-                self.v = self.v0 / np.float(res.x)
+                if "x" in dir(res):
+                    res = res.x
+                else:
+                    res = res[0]
+                self.v = self.v0 / np.float(res)
 
     def bm3_inverse(self, v0_v):
         """

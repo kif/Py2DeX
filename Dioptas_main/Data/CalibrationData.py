@@ -18,14 +18,14 @@
 
 __author__ = 'Clemens Prescher'
 
-from pyFAI.peakPicker import Massif
+from pyFAI.massif import Massif
 from pyFAI.blob_detection import BlobDetection
 from pyFAI.calibration import Calibration
 from pyFAI.geometryRefinement import GeometryRefinement
 from pyFAI.azimuthalIntegrator import AzimuthalIntegrator
 from pyFAI.calibrant import Calibrant
 from Data.HelperModule import get_base_name
-import Calibrants
+#import Calibrants
 import os
 import numpy as np
 
